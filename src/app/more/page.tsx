@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
 import {
   Briefcase,
   Calendar,
@@ -33,22 +34,24 @@ import {
   BarChart3,
   Receipt,
   ChevronRight,
+  TrendingUp,
 } from "lucide-react";
 
 interface NavSection {
   title: string;
-  items: { label: string; icon: React.ReactNode; badge?: number }[];
+  items: { label: string; icon: React.ReactNode; href?: string; badge?: number }[];
 }
 
 const sections: NavSection[] = [
   {
     title: "My Work",
     items: [
-      { label: "Tasks", icon: <CheckSquare className="w-5 h-5" /> },
-      { label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
-      { label: "Projects", icon: <Briefcase className="w-5 h-5" /> },
+      { label: "Tasks", icon: <CheckSquare className="w-5 h-5" />, href: "/tasks" },
+      { label: "Calendar", icon: <Calendar className="w-5 h-5" />, href: "/calendar" },
+      { label: "Projects", icon: <Briefcase className="w-5 h-5" />, href: "/projects" },
+      { label: "Pipeline", icon: <TrendingUp className="w-5 h-5" />, href: "/pipeline" },
+      { label: "Installations", icon: <Wrench className="w-5 h-5" />, href: "/installations" },
       { label: "Routes", icon: <MapPin className="w-5 h-5" /> },
-      { label: "Installations", icon: <Wrench className="w-5 h-5" /> },
     ],
   },
   {
@@ -128,28 +131,48 @@ export default function MorePage() {
             {section.title}
           </h2>
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
-            {section.items.map((item) => (
-              <button
-                key={item.label}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-              >
-                <span className="text-gray-400">{item.icon}</span>
-                <span className="flex-1 text-sm font-medium text-gray-900 text-left">{item.label}</span>
-                {item.badge && (
-                  <span className="min-w-[1.25rem] h-5 px-1.5 rounded-full bg-brand-blue text-white text-[11px] font-bold flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
-                <ChevronRight className="w-4 h-4 text-gray-300" />
-              </button>
-            ))}
+            {section.items.map((item) => {
+              const inner = (
+                <>
+                  <span className="text-gray-400">{item.icon}</span>
+                  <span className="flex-1 text-sm font-medium text-gray-900 text-left">{item.label}</span>
+                  {item.badge && (
+                    <span className="min-w-[1.25rem] h-5 px-1.5 rounded-full bg-brand-blue text-white text-[11px] font-bold flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-gray-300" />
+                </>
+              );
+
+              if (item.href) {
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  >
+                    {inner}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={item.label}
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                >
+                  {inner}
+                </button>
+              );
+            })}
           </div>
         </div>
       ))}
 
       {/* App version */}
       <p className="text-center text-[11px] text-gray-300 pt-2 pb-4">
-        NSEC Employee Portal v1.0 &middot; National Stage Equipment Company
+        NSEC Employee Portal v2.0 · National Stage Equipment Company
       </p>
     </div>
   );

@@ -3,133 +3,197 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { tasks } from "@/lib/mock-data";
-import { AlertTriangle, Eye, EyeOff, Clock, CheckCircle2, Filter } from "lucide-react";
+import { useMondayData } from "@/lib/use-monday-data";
+import type { Task } from "@/lib/monday-types";
+import { AlertTriangle, Search, CheckCircle2, Flag, Plus } from "lucide-react";
 
-type StatusFilter = "all" | "overdue" | "not_viewed" | "in_progress" | "pending" | "complete";
-
-const filterOptions: { value: StatusFilter; label: string; icon: React.ReactNode; color: string }[] = [
-  { value: "all", label: "All", icon: null, color: "bg-gray-100 text-gray-700" },
-  { value: "overdue", label: "Overdue", icon: <AlertTriangle className="w-3.5 h-3.5" />, color: "bg-red-100 text-red-700" },
-  { value: "not_viewed", label: "New", icon: <EyeOff className="w-3.5 h-3.5" />, color: "bg-blue-100 text-blue-700" },
-  { value: "in_progress", label: "Active", icon: <Eye className="w-3.5 h-3.5" />, color: "bg-emerald-100 text-emerald-700" },
-  { value: "pending", label: "Pending", icon: <Clock className="w-3.5 h-3.5" />, color: "bg-amber-100 text-amber-700" },
-  { value: "complete", label: "Done", icon: <CheckCircle2 className="w-3.5 h-3.5" />, color: "bg-gray-100 text-gray-500" },
-];
+type StatusFilter = "all" | "today" | "upcoming" | "complete";
 
 export default function TasksPage() {
   const { isLoggedIn } = useAuth();
   const router = useRouter();
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [search, setSearch] = useState("");
+  const { data: tasks, loading, error } = useMondayData<Task[]>("tasks");
 
   useEffect(() => {
     if (!isLoggedIn) router.replace("/");
   }, [isLoggedIn, router]);
 
-  const filtered = filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
+  if (error) {
+    return (
+      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+        <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
+        <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
+      </div>
+    );
+  }
+
+  if (loading || !tasks) {
+    return (
+      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-sm text-gray-500">Loading tasks from Monday.com...</p>
+      </div>
+    );
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+
+  // Counts for tabs
+  const todayTasks = tasks.filter((t) => t.dueDate === today && t.status !== "complete");
+  const upcomingTasks = tasks.filter((t) => t.dueDate > today && t.status !== "complete");
+  const completedTasks = tasks.filter((t) => t.status === "complete");
+  const activeTasks = tasks.filter((t) => t.status !== "complete");
+
+  // Apply filter
+  let filtered = tasks;
+  if (filter === "today") filtered = todayTasks;
+  else if (filter === "upcoming") filtered = upcomingTasks;
+  else if (filter === "complete") filtered = completedTasks;
+
+  // Apply search
+  if (search.trim()) {
+    const q = search.toLowerCase();
+    filtered = filtered.filter(
+      (t) => t.title.toLowerCase().includes(q) || t.project.toLowerCase().includes(q) || t.assignee.toLowerCase().includes(q)
+    );
+  }
 
   return (
     <div className="px-4 py-4 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-900">Tasks</h1>
-        <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
-          <Filter className="w-5 h-5" />
-        </button>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Tasks</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Manage all tasks across projects</p>
+        </div>
       </div>
 
-      {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 no-scrollbar">
-        {filterOptions.map((opt) => {
-          const active = filter === opt.value;
-          return (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
-                active
-                  ? opt.color + " ring-1 ring-current/20"
-                  : "bg-gray-50 text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              {opt.icon}
-              {opt.label}
-              {opt.value !== "all" && (
-                <span className="ml-0.5 text-[10px] opacity-70">
-                  {tasks.filter((t) => t.status === opt.value).length}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      {/* Search */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full h-10 pl-9 pr-4 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue"
+        />
       </div>
 
-      {/* Task list */}
-      <div className="space-y-2">
+      {/* Tab filters matching Replit: All Tasks (6), Today (2), Upcoming (3), Completed (1) */}
+      <div className="flex border-b border-gray-200 mb-4 -mx-4 px-4 no-scrollbar overflow-x-auto">
+        {([
+          { value: "all" as const, label: "All Tasks", count: activeTasks.length },
+          { value: "today" as const, label: "Today", count: todayTasks.length },
+          { value: "upcoming" as const, label: "Upcoming", count: upcomingTasks.length },
+          { value: "complete" as const, label: "Completed", count: completedTasks.length },
+        ]).map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setFilter(tab.value)}
+            className={`relative px-3 py-2.5 text-xs font-medium whitespace-nowrap transition-colors ${
+              filter === tab.value
+                ? "text-brand-blue"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.label} ({tab.count})
+            {filter === tab.value && (
+              <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-brand-blue rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Task list — checkbox style like Replit */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-50">
         {filtered.map((task) => (
           <div
             key={task.id}
-            className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm active:scale-[0.99] transition-transform"
+            className="px-4 py-3.5 flex items-start gap-3"
           >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot(task.status)}`} />
-                  <span className={`text-[11px] font-medium uppercase ${statusText(task.status)}`}>
-                    {task.status.replace("_", " ")}
-                  </span>
-                  {task.priority === "high" && (
-                    <span className="text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">HIGH</span>
-                  )}
+            {/* Checkbox */}
+            <div className="mt-0.5 shrink-0">
+              {task.status === "complete" ? (
+                <div className="w-5 h-5 rounded bg-brand-blue flex items-center justify-center">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                 </div>
-                <p className="text-sm font-medium text-gray-900">{task.title}</p>
-                <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                  <span>{task.project}</span>
-                  <span>&middot;</span>
-                  <span>Due {formatDate(task.dueDate)}</span>
-                </div>
-              </div>
+              ) : (
+                <div className={`w-5 h-5 rounded border-2 ${
+                  task.status === "overdue" ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`} />
+              )}
             </div>
-            <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
-              <span className="text-xs text-gray-400">{task.assignee}</span>
-              <button className="text-xs text-brand-blue font-medium">View</button>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium ${task.status === "complete" ? "text-gray-400 line-through" : "text-gray-900"}`}>
+                {task.title}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {task.project} · {task.dueDate ? formatDate(task.dueDate) : "No date"}
+              </p>
+            </div>
+
+            {/* Right side: avatar + priority */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Assignee initials avatar */}
+              <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-600 text-[10px] font-bold flex items-center justify-center">
+                {getInitials(task.assignee)}
+              </div>
+
+              {/* Priority flag badge */}
+              {task.priority && task.status !== "complete" && (
+                <span className={`flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded ${priorityBadge(task.priority)}`}>
+                  <Flag className="w-2.5 h-2.5" />
+                  {task.priority === "high" ? "High" : task.priority === "medium" ? "Medium" : "Low"}
+                </span>
+              )}
             </div>
           </div>
         ))}
-
-        {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <CheckCircle2 className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">No tasks in this category</p>
-          </div>
-        )}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12">
+          <CheckCircle2 className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+          <p className="text-sm text-gray-400">No tasks in this category</p>
+        </div>
+      )}
     </div>
   );
 }
 
-function statusDot(status: string) {
-  switch (status) {
-    case "overdue": return "bg-red-500";
-    case "not_viewed": return "bg-blue-500";
-    case "in_progress": return "bg-emerald-500";
-    case "pending": return "bg-amber-500";
-    case "complete": return "bg-gray-400";
-    default: return "bg-gray-300";
-  }
+function getInitials(name: string) {
+  if (!name || name === "Unassigned") return "?";
+  const parts = name.split(" ");
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
 }
 
-function statusText(status: string) {
-  switch (status) {
-    case "overdue": return "text-red-500";
-    case "not_viewed": return "text-blue-500";
-    case "in_progress": return "text-emerald-500";
-    case "pending": return "text-amber-500";
-    case "complete": return "text-gray-400";
-    default: return "text-gray-400";
+function priorityBadge(priority: string) {
+  switch (priority) {
+    case "high": return "bg-red-50 text-red-600 border border-red-200";
+    case "medium": return "bg-amber-50 text-amber-600 border border-amber-200";
+    case "low": return "bg-gray-50 text-gray-500 border border-gray-200";
+    default: return "bg-gray-50 text-gray-500";
   }
 }
 
 function formatDate(d: string) {
+  if (!d) return "No date";
   const date = new Date(d + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const taskDate = new Date(d + "T00:00:00");
+
+  if (taskDate.getTime() === today.getTime()) return "Today";
+  if (taskDate.getTime() === tomorrow.getTime()) return "Tomorrow";
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
