@@ -33,7 +33,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar onQuickCreate={() => setQuickCreateOpen(true)} />
 
       {/* Main content: offset for sidebar on desktop */}
-      <main className="pt-14 pb-20 lg:pb-6 lg:pl-60 xl:pl-64 transition-[padding] duration-300">
+      <main className="pt-14 pb-20 lg:pb-6 lg:pl-60 xl:pl-[272px] transition-[padding] duration-300">
         <div className="animate-fadeIn">
           {children}
         </div>

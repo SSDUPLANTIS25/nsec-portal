@@ -29,7 +29,7 @@ export default function InstallationsPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+      <div className="px-4 py-16 max-w-lg lg:max-w-none mx-auto text-center">
         <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-6 h-6 text-amber-500" />
         </div>
@@ -41,7 +41,7 @@ export default function InstallationsPage() {
 
   if (loading || !installations) {
     return (
-      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+      <div className="px-4 py-16 max-w-lg lg:max-w-none mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-sm text-gray-500">Loading installations...</p>
       </div>
@@ -71,7 +71,7 @@ export default function InstallationsPage() {
   const totalHours = installations.reduce((sum, i) => sum + (i.totalHours ?? 0), 0);
 
   return (
-    <div className="px-4 lg:px-6 py-5 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
+    <div className="px-4 lg:px-8 py-5 lg:py-6 max-w-lg lg:max-w-none mx-auto">
       <div className="mb-4">
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">Installations</h1>
         <p className="text-sm text-gray-500 mt-0.5">Track crew dispatch and installation progress</p>

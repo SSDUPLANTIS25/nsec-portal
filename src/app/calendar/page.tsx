@@ -21,7 +21,7 @@ export default function CalendarPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+      <div className="px-4 py-16 max-w-lg lg:max-w-none mx-auto text-center">
         <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-6 h-6 text-amber-500" />
         </div>
@@ -33,7 +33,7 @@ export default function CalendarPage() {
 
   if (loading || !calendarEvents) {
     return (
-      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+      <div className="px-4 py-16 max-w-lg lg:max-w-none mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="text-sm text-gray-500">Loading calendar...</p>
       </div>
@@ -81,15 +81,15 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
+    <div className="max-w-lg lg:max-w-none mx-auto">
       {/* Page header */}
-      <div className="px-4 lg:px-6 pt-5 pb-2">
+      <div className="px-4 lg:px-8 pt-5 lg:pt-6 pb-2">
         <h1 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">Installation Calendar</h1>
         <p className="text-sm text-gray-500 mt-0.5">Schedule and track installation crews</p>
       </div>
 
       {/* Status summary cards */}
-      <div className="px-4 lg:px-6 pt-2 pb-4">
+      <div className="px-4 lg:px-8 pt-2 pb-4">
         <div className="grid grid-cols-3 gap-2.5">
           <div className="bg-emerald-50 rounded-xl stat-card">
             <div>
@@ -116,13 +116,13 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar View heading */}
-      <div className="px-4 lg:px-6 pb-1">
+      <div className="px-4 lg:px-8 pb-1">
         <p className="section-title">Calendar View</p>
         <p className="text-[11px] text-gray-400 mt-0.5">Color-coded by deadline status</p>
       </div>
 
       {/* Desktop: side-by-side calendar + events */}
-      <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:px-6">
+      <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:px-8">
       <div className="lg:col-span-3">
 
       {/* Month header */}

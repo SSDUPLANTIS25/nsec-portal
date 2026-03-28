@@ -136,7 +136,7 @@ export default function Sidebar({ onQuickCreate }: Props) {
     section.items.reduce((sum, item) => sum + (item.badge ?? 0), 0);
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-60 xl:w-64 fixed top-14 left-0 bottom-0 bg-white border-r border-border z-40">
+    <aside className="hidden lg:flex lg:flex-col lg:w-60 xl:w-[272px] fixed top-14 left-0 bottom-0 bg-white border-r border-border z-40">
       {/* Quick Create */}
       <div className="p-3">
         <button
