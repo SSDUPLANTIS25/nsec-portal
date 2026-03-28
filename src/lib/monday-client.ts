@@ -38,10 +38,25 @@ export async function mondayQuery(query: string, variables?: Record<string, unkn
   });
 
   if (!res.ok) {
+    const body = await res.text();
+    console.error(`[Monday API] HTTP ${res.status}: ${body}`);
     throw new Error(`Monday.com API error: ${res.status} ${res.statusText}`);
   }
 
-  return res.json();
+  const json = await res.json();
+
+  if (json.errors && json.errors.length > 0) {
+    console.error(`[Monday API] GraphQL errors:`, JSON.stringify(json.errors));
+    throw new Error(`Monday.com GraphQL error: ${json.errors.map((e: { message: string }) => e.message).join(", ")}`);
+  }
+
+  if (json.error_code) {
+    console.error(`[Monday API] API error:`, json.error_code, json.error_message);
+    throw new Error(`Monday.com API error: ${json.error_code} - ${json.error_message}`);
+  }
+
+  console.log(`[Monday API] Success — keys in data:`, Object.keys(json.data || {}));
+  return json;
 }
 
 /**
@@ -83,6 +98,10 @@ export async function fetchBoardItems(
   }
 
   const boards = data.boards as { items_page: { cursor: string | null; items: MondayItem[] } }[];
+  console.log(`[Monday API] Board query for ${boardId}: got ${boards?.length ?? 0} boards, ${boards?.[0]?.items_page?.items?.length ?? 0} items`);
+  if (!boards || boards.length === 0) {
+    console.error(`[Monday API] No boards returned for ID ${boardId}. Full response data:`, JSON.stringify(data));
+  }
   const page = boards[0]?.items_page;
   return { items: page?.items ?? [], cursor: page?.cursor ?? null };
 }
