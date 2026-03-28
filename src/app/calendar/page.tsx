@@ -128,7 +128,7 @@ export default function CalendarPage() {
 
       {/* Month header with navigation */}
       <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={() => shiftMonth(-1)} className="p-2 rounded-lg hover:bg-gray-100">
+        <button onClick={() => shiftMonth(-1)} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Previous month">
           <ChevronLeft className="w-5 h-5 text-gray-500" />
         </button>
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function CalendarPage() {
             Today
           </button>
         </div>
-        <button onClick={() => shiftMonth(1)} className="p-2 rounded-lg hover:bg-gray-100">
+        <button onClick={() => shiftMonth(1)} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Next month">
           <ChevronRight className="w-5 h-5 text-gray-500" />
         </button>
       </div>
@@ -166,12 +166,12 @@ export default function CalendarPage() {
               <button
                 key={i}
                 onClick={() => setSelectedDate(dateStr)}
-                className={`h-11 flex flex-col items-center justify-center bg-white relative transition-all ${
+                className={`h-11 flex flex-col items-center justify-center bg-white relative transition-all cursor-pointer ${
                   isSelected
                     ? "bg-brand-blue text-white z-10 ring-2 ring-brand-blue"
                     : isToday
-                    ? "bg-blue-50 text-brand-blue font-bold"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-blue-50 text-brand-blue font-bold hover:bg-blue-100"
+                    : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
                 }`}
               >
                 <span className="text-xs">{day}</span>

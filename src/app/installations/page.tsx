@@ -150,7 +150,7 @@ export default function InstallationsPage() {
           return (
             <div
               key={install.id}
-              className={`bg-white rounded-xl p-4 border shadow-sm ${
+              className={`bg-white rounded-xl p-4 border shadow-sm card-hover ${
                 isOverdue ? "border-red-200 bg-red-50/30" : "border-gray-100"
               }`}
             >

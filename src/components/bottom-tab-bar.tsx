@@ -54,8 +54,8 @@ export default function BottomTabBar({ onQuickCreate }: Props) {
                 active ? "text-brand-blue" : "text-gray-400"
               }`}
             >
-              <tab.Icon className={`w-6 h-6 ${active ? "stroke-[2.5]" : ""}`} />
-              <span className="text-[11px] font-medium">{tab.label}</span>
+              <tab.Icon className={`w-6 h-6 transition-all ${active ? "stroke-[2.5] text-brand-blue" : "text-gray-400 stroke-[1.5]"}`} />
+              <span className={`text-[11px] transition-colors ${active ? "font-bold text-brand-blue" : "font-medium text-gray-400"}`}>{tab.label}</span>
             </Link>
           );
         })}

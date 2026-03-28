@@ -198,7 +198,7 @@ function ProjectCard({ project }: { project: Project }) {
   const progress = hasPrice && hasBalance ? Math.round(((project.totalPrice! - project.balance!) / project.totalPrice!) * 100) : undefined;
 
   return (
-    <div className="bg-white rounded-xl p-3.5 border border-gray-100 shadow-sm flex flex-col">
+    <div className="bg-white rounded-xl p-3.5 border border-gray-100 shadow-sm flex flex-col card-hover">
       <div className="flex items-start justify-between gap-1 mb-1.5">
         <p className="text-sm font-medium text-gray-900 leading-tight">{project.name}</p>
       </div>

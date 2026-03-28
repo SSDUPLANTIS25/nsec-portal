@@ -149,17 +149,17 @@ export default function DashboardPage() {
       {/* Summary Row — quick glance cards */}
       <section>
         <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
-          <Link href="/tasks" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-transform">
+          <Link href="/tasks" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
             <CheckCircle2 className="w-5 h-5 text-brand-blue mx-auto mb-1" />
             <p className="text-xl font-bold text-gray-900">{totalActive}</p>
             <p className="text-[10px] text-gray-500 font-medium">Active Tasks</p>
           </Link>
-          <Link href="/calendar" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-transform">
+          <Link href="/calendar" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
             <Calendar className="w-5 h-5 text-purple-500 mx-auto mb-1" />
             <p className="text-xl font-bold text-gray-900">{todayEvents.length}</p>
             <p className="text-[10px] text-gray-500 font-medium">Today&apos;s Events</p>
           </Link>
-          <Link href="/projects" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-transform">
+          <Link href="/projects" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
             <Briefcase className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
             <p className="text-xl font-bold text-gray-900">{activeProjectCount}</p>
             <p className="text-[10px] text-gray-500 font-medium">Active Projects</p>
@@ -408,7 +408,7 @@ function formatDateShort(d: string) {
 
 function KPICard({ label, value, sub, icon }: { label: string; value: string; sub: string; icon: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
+    <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm card-hover">
       <div className="flex items-center gap-1.5 mb-1">
         {icon}
         <span className="text-xs text-gray-500 font-medium">{label}</span>
