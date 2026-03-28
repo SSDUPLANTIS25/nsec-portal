@@ -122,9 +122,10 @@ export default function MorePage() {
   }, [isLoggedIn, router]);
 
   return (
-    <div className="px-4 py-4 max-w-lg mx-auto space-y-5">
+    <div className="px-4 py-4 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto space-y-5">
       <h1 className="text-xl font-bold text-gray-900">More</h1>
 
+      <div className="lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-4 space-y-5 lg:space-y-0">
       {sections.map((section) => (
         <div key={section.title}>
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5 px-1">
@@ -169,6 +170,7 @@ export default function MorePage() {
           </div>
         </div>
       ))}
+      </div>
 
       {/* App version */}
       <p className="text-center text-[11px] text-gray-300 pt-2 pb-4">

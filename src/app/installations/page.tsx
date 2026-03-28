@@ -31,7 +31,7 @@ export default function InstallationsPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
         <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
@@ -41,7 +41,7 @@ export default function InstallationsPage() {
 
   if (loading || !installations) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-sm text-gray-500">Loading installations from Monday.com...</p>
       </div>
@@ -76,7 +76,7 @@ export default function InstallationsPage() {
   const totalHours = installations.reduce((sum, i) => sum + (i.totalHours ?? 0), 0);
 
   return (
-    <div className="px-4 py-4 max-w-lg mx-auto">
+    <div className="px-4 py-4 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-xl font-bold text-gray-900">Installations</h1>
       </div>
@@ -143,7 +143,7 @@ export default function InstallationsPage() {
       </div>
 
       {/* Installation list */}
-      <div className="space-y-2">
+      <div className="space-y-2 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-3 lg:space-y-0">
         {filtered.map((install) => {
           const isOverdue = install.jobStatus !== "Totally Complete" && install.date && new Date(install.date) < new Date(today);
 

@@ -35,7 +35,7 @@ export default function ProjectsPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
         <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
@@ -45,7 +45,7 @@ export default function ProjectsPage() {
 
   if (loading || !projects) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-sm text-gray-500">Loading projects from Monday.com...</p>
       </div>
@@ -82,7 +82,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="px-4 py-4 max-w-lg mx-auto">
+    <div className="px-4 py-4 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
@@ -92,7 +92,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Summary cards — large colored backgrounds like Replit */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
         <div className="bg-blue-50 rounded-xl p-3 flex items-center justify-between">
           <div>
             <p className="text-xs text-blue-600 font-medium">Active Projects</p>
@@ -172,8 +172,8 @@ export default function ProjectsPage() {
               </span>
             </div>
 
-            {/* 2-column grid like Replit */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Responsive project card grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 lg:gap-3">
               {groupProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}

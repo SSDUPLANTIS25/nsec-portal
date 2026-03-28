@@ -21,7 +21,7 @@ export default function CalendarPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
         <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
@@ -31,7 +31,7 @@ export default function CalendarPage() {
 
   if (loading || !calendarEvents) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-sm text-gray-500">Loading calendar from Monday.com...</p>
       </div>
@@ -82,7 +82,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       {/* Page header */}
       <div className="px-4 pt-3 pb-1">
         <h1 className="text-xl font-bold text-gray-900">Installation Calendar</h1>
@@ -121,6 +121,10 @@ export default function CalendarPage() {
         <p className="text-sm font-semibold text-gray-700">Calendar View</p>
         <p className="text-[10px] text-gray-400">Color-coded by deadline status</p>
       </div>
+
+      {/* Desktop: side-by-side calendar + events */}
+      <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:px-4">
+      <div className="lg:col-span-3">
 
       {/* Month header with navigation */}
       <div className="flex items-center justify-between px-4 py-2">
@@ -187,8 +191,11 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      </div>{/* end calendar left column */}
+      <div className="lg:col-span-2">
+
       {/* Selected day events */}
-      <div className="px-4 pt-2 pb-2">
+      <div className="px-4 lg:px-0 pt-2 pb-2">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
           {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </h3>
@@ -263,6 +270,8 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+      </div>{/* end right column */}
+      </div>{/* end desktop grid */}
     </div>
   );
 }

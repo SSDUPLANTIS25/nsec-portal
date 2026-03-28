@@ -26,7 +26,7 @@ export default function BottomTabBar({ onQuickCreate }: Props) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 pb-safe">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 pb-safe lg:hidden">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {tabs.map((tab) => {
           if (tab.href === "__action__") {

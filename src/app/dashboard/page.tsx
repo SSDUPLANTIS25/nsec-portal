@@ -49,7 +49,7 @@ export default function DashboardPage() {
 
   if (tasksError) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl mx-auto text-center">
         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
         <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
@@ -60,7 +60,7 @@ export default function DashboardPage() {
   const loading = tasksLoading || eventsLoading || alertsLoading || kpisLoading || projectsLoading || installsLoading || ordersLoading;
   if (loading) {
     return (
-      <div className="px-4 py-12 max-w-lg mx-auto text-center">
+      <div className="px-4 py-12 max-w-lg lg:max-w-5xl mx-auto text-center">
         <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-sm text-gray-500">Loading Mission Control...</p>
       </div>
@@ -109,10 +109,10 @@ export default function DashboardPage() {
   const totalProjects = allProjects.length;
 
   return (
-    <div className="px-4 py-4 space-y-4 max-w-lg mx-auto">
+    <div className="px-4 py-4 space-y-4 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       {/* Greeting */}
       <div>
-        <h1 className="text-xl font-bold text-gray-900">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
           {getGreeting()}, {user.name.split(" ")[0]}
         </h1>
         <p className="text-sm text-gray-500 mt-0.5">Mission Control</p>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
 
       {/* Summary Row — quick glance cards */}
       <section>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
           <Link href="/tasks" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-transform">
             <CheckCircle2 className="w-5 h-5 text-brand-blue mx-auto mb-1" />
             <p className="text-xl font-bold text-gray-900">{totalActive}</p>
@@ -166,6 +166,12 @@ export default function DashboardPage() {
           </Link>
         </div>
       </section>
+
+      {/* Desktop 2-column layout for middle sections */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-4 lg:space-y-0">
+
+      {/* Left column on desktop */}
+      <div className="space-y-4">
 
       {/* Task Status Breakdown */}
       <section>
@@ -220,6 +226,11 @@ export default function DashboardPage() {
         )}
       </section>
 
+      </div>{/* end left column */}
+
+      {/* Right column on desktop */}
+      <div className="space-y-4">
+
       {/* Procurement Orders */}
       <section>
         <div className="flex items-center justify-between mb-2">
@@ -251,7 +262,7 @@ export default function DashboardPage() {
       {user.role === "management" && kpis && (
         <section>
           <h2 className="text-sm font-semibold text-gray-700 mb-2">Performance</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <KPICard
               label="Revenue Pipeline"
               value={formatCurrency(pipelineValue)}
@@ -280,6 +291,10 @@ export default function DashboardPage() {
         </section>
       )}
 
+      </div>{/* end right column */}
+      </div>{/* end 2-column layout */}
+
+      {/* Below: full-width sections */}
       {/* Installation Summary */}
       <section>
         <div className="flex items-center justify-between mb-2">
