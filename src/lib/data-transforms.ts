@@ -2,13 +2,12 @@
  * Transform Monday.com API responses into portal-ready data structures.
  *
  * Each function takes raw Monday.com items and returns typed portal objects.
+ * Column IDs are mapped to the NSEC Monday.com workspace (account 33659457).
  */
 
 import {
   type MondayItem,
   type MondayStatusValue,
-  type MondayDateValue,
-  type MondayTimelineValue,
   type Task,
   type TaskStatus,
   type TaskPriority,
@@ -21,6 +20,7 @@ import {
   type Employee,
   type UserRole,
   type DashboardKPIs,
+  BOARD_IDS,
 } from "./monday-types";
 import { getColumnText, getColumnValue } from "./monday-client";
 
@@ -64,69 +64,60 @@ function deriveTaskPriority(status: TaskStatus, dueDate?: string): TaskPriority 
   return "low";
 }
 
-const DEPARTMENT_ROLE_MAP: Record<string, UserRole> = {
-  "Install": "field",
-  "Welding": "field",
-  "PM-Sales": "office",
-  "HUB": "office",
-  "Remote": "office",
-  "Admin": "office",
-};
-
 // ─── Transform Functions ─────────────────────────────────────────────────────
 
 /**
- * Transform Requests & Tasks board items into portal Task objects.
+ * Transform Tasks board items into portal Task objects.
+ * Board: Tasks (18398842181)
  */
 export function transformTasks(items: MondayItem[]): Task[] {
   return items.map((item) => {
-    const statusVal = getColumnValue<MondayStatusValue>(item, "status");
-    const statusLabel = statusVal?.label ?? getColumnText(item, "status");
-    const dueDate = getColumnText(item, "date") || getColumnText(item, "due_date");
+    const statusVal = getColumnValue<MondayStatusValue>(item, "color_mm0eee6y");
+    const statusLabel = statusVal?.label ?? getColumnText(item, "color_mm0eee6y");
+    const dueDate = getColumnText(item, "date_mm0eg1mp");
     const status = mapTaskStatus(statusLabel, dueDate);
     const priority = deriveTaskPriority(status, dueDate);
 
     return {
       id: item.id,
       title: item.name,
-      project: getColumnText(item, "category") || item.group.title,
+      project: item.group.title,
       status,
       dueDate: dueDate || "",
-      assignee: getColumnText(item, "person") || "Unassigned",
+      assignee: getColumnText(item, "multiple_person_mm0eb2qj") || "Unassigned",
       priority,
-      description: getColumnText(item, "long_text") || undefined,
-      projectManager: getColumnText(item, "person__1") || undefined, // PM column
+      description: getColumnText(item, "text_mm0ev8kj") || undefined,
+      projectManager: undefined,
       mondayItemId: item.id,
       mondayGroupId: item.group.id,
-      mondayBoardId: "4015603070",
+      mondayBoardId: BOARD_IDS.REQUESTS_TASKS,
     };
   });
 }
 
 /**
  * Transform Project Index board items into portal Project objects.
+ * Board: Project Index (18398836223)
  */
 export function transformProjects(items: MondayItem[]): Project[] {
   return items.map((item) => {
-    const timelineVal = getColumnValue<MondayTimelineValue>(item, "timeline");
-
     return {
       id: item.id,
       name: item.name,
-      jobNumber: getColumnText(item, "text") || undefined, // Job Number col
-      companyName: getColumnText(item, "text5") || undefined,
-      projectManager: getColumnText(item, "person") || undefined,
-      location: getColumnText(item, "job_location") || undefined,
-      installWindow: timelineVal ? { from: timelineVal.from, to: timelineVal.to } : undefined,
-      currentStage: getColumnText(item, "current_stage") || undefined,
-      leadStatus: getColumnText(item, "lead_status") || undefined,
-      proposalStatus: getColumnText(item, "proposal_status") || undefined,
-      installationStatus: getColumnText(item, "installation_status") || undefined,
-      totalPrice: parseFloat(getColumnText(item, "total_price")) || undefined,
-      balance: parseFloat(getColumnText(item, "balance")) || undefined,
-      income: parseFloat(getColumnText(item, "income")) || undefined,
-      systems: getColumnText(item, "tags") ? getColumnText(item, "tags").split(", ") : undefined,
-      description: getColumnText(item, "long_text") || undefined,
+      jobNumber: getColumnText(item, "text_mm0d6q14") || undefined,
+      companyName: getColumnText(item, "text_mm0d1xyw") || undefined,
+      projectManager: getColumnText(item, "project_owner") || undefined,
+      location: getColumnText(item, "text_mm0dj91z") || undefined,
+      installWindow: undefined,
+      currentStage: item.group.title || undefined,
+      leadStatus: undefined,
+      proposalStatus: getColumnText(item, "color_mm0dqg57") || undefined,
+      installationStatus: undefined,
+      totalPrice: parseFloat(getColumnText(item, "numeric_mm0dp3x0")) || undefined,
+      balance: undefined,
+      income: undefined,
+      systems: undefined,
+      description: getColumnText(item, "long_text_mm0dy1mz") || undefined,
       group: item.group.title,
       mondayItemId: item.id,
     };
@@ -134,18 +125,19 @@ export function transformProjects(items: MondayItem[]): Project[] {
 }
 
 /**
- * Transform Installation board items into portal Installation objects.
+ * Transform Install Reports board items into portal Installation objects.
+ * Board: Install Reports (18399893998)
  */
 export function transformInstallations(items: MondayItem[]): Installation[] {
   return items.map((item) => ({
     id: item.id,
     name: item.name,
-    jobStatus: getColumnText(item, "status") || "In Progress",
-    date: getColumnText(item, "date") || "",
+    jobStatus: getColumnText(item, "color_mm13q6sp") || getColumnText(item, "color_mm13bxbc") || "In Progress",
+    date: getColumnText(item, "date4") || "",
     projectManager: getColumnText(item, "person") || undefined,
-    installer: getColumnText(item, "person__1") || undefined,
-    crewSize: parseInt(getColumnText(item, "numbers")) || undefined,
-    totalHours: parseFloat(getColumnText(item, "numbers__1")) || undefined,
+    installer: getColumnText(item, "multiple_person_mm136w3q") || undefined,
+    crewSize: undefined,
+    totalHours: parseFloat(getColumnText(item, "text_mm13jt22")) || undefined,
     mondayItemId: item.id,
   }));
 }
@@ -162,7 +154,7 @@ export function generateAlerts(installations: Installation[]): Alert[] {
     if (!install.date) continue;
     const installDate = new Date(install.date);
 
-    if (install.jobStatus !== "Totally Complete" && installDate < today) {
+    if (install.jobStatus !== "Totally Complete" && install.jobStatus !== "Yes" && installDate < today) {
       const daysOver = Math.ceil((today.getTime() - installDate.getTime()) / (1000 * 60 * 60 * 24));
       alerts.push({
         id: `alert-${install.id}`,
@@ -179,20 +171,21 @@ export function generateAlerts(installations: Installation[]): Alert[] {
 }
 
 /**
- * Transform Meetings board items into CalendarEvent objects.
+ * Transform Meeting Notes board items into CalendarEvent objects.
+ * Board: Meeting Notes (18398837529)
  */
 export function transformMeetings(items: MondayItem[]): CalendarEvent[] {
   return items.map((item) => ({
     id: item.id,
     title: item.name,
-    date: getColumnText(item, "date") || "",
-    time: getColumnText(item, "hour") || "",
-    endTime: getColumnText(item, "hour__1") || undefined,
-    attendees: getColumnText(item, "person") ? getColumnText(item, "person").split(", ") : undefined,
-    teamsLink: getColumnText(item, "link") || undefined,
+    date: getColumnText(item, "date_mm09raq5") || "",
+    time: "",
+    endTime: undefined,
+    attendees: getColumnText(item, "multiple_person_mm09zqtd") ? getColumnText(item, "multiple_person_mm09zqtd").split(", ") : undefined,
+    teamsLink: undefined,
     type: "meeting" as CalendarEventType,
     mondayItemId: item.id,
-    sourceBoardId: "18397692294",
+    sourceBoardId: BOARD_IDS.MEETINGS,
   }));
 }
 
@@ -201,7 +194,7 @@ export function transformMeetings(items: MondayItem[]): CalendarEvent[] {
  */
 export function installationsToCalendarEvents(installations: Installation[]): CalendarEvent[] {
   return installations
-    .filter((i) => i.date && i.jobStatus !== "Totally Complete")
+    .filter((i) => i.date && i.jobStatus !== "Totally Complete" && i.jobStatus !== "Yes")
     .map((i) => ({
       id: `install-${i.id}`,
       title: `${i.name} — Install`,
@@ -209,7 +202,7 @@ export function installationsToCalendarEvents(installations: Installation[]): Ca
       time: "7:00 AM",
       type: "installation" as CalendarEventType,
       mondayItemId: i.mondayItemId,
-      sourceBoardId: "2154290563",
+      sourceBoardId: BOARD_IDS.INSTALLATION,
     }));
 }
 
@@ -226,48 +219,47 @@ export function ordersToCalendarEvents(orders: Order[]): CalendarEvent[] {
       time: "9:00 AM",
       type: "delivery" as CalendarEventType,
       mondayItemId: o.mondayItemId,
-      sourceBoardId: "7436908659",
+      sourceBoardId: BOARD_IDS.ORDERING,
     }));
 }
 
 /**
- * Transform Ordering board items into portal Order objects.
+ * Transform Orders board items into portal Order objects.
+ * Board: Orders (18398843260)
  */
 export function transformOrders(items: MondayItem[]): Order[] {
   return items.map((item) => ({
     id: item.id,
     name: item.name,
-    status: getColumnText(item, "status") || "Unknown",
-    materials: getColumnText(item, "text") || undefined,
-    vendor: getColumnText(item, "status__1") || undefined,
-    dateOrdered: getColumnText(item, "date") || undefined,
-    eta: getColumnText(item, "date__1") || undefined,
-    vendorOrderNumber: getColumnText(item, "text__1") || undefined,
-    trackingStatus: getColumnText(item, "status__2") || undefined,
+    status: getColumnText(item, "color_mm0gyhjv") || getColumnText(item, "status") || "Unknown",
+    materials: getColumnText(item, "text_mm0gcgvy") || undefined,
+    vendor: getColumnText(item, "text_mm0gyvvc") || undefined,
+    dateOrdered: getColumnText(item, "date_mm0gdp7m") || undefined,
+    eta: getColumnText(item, "date_mm0g5kd0") || undefined,
+    vendorOrderNumber: getColumnText(item, "text_mm0ga4yp") || undefined,
+    trackingStatus: getColumnText(item, "text_mm0gs5g0") || undefined,
     mondayItemId: item.id,
   }));
 }
 
 /**
- * Transform Employee Directory items into portal Employee objects.
+ * Transform Contacts board items into portal Employee objects.
+ * Board: Contacts (18398842284)
  */
 export function transformEmployees(items: MondayItem[]): Employee[] {
   return items.map((item) => {
-    const dept = getColumnText(item, "status") || "";
-    const role: UserRole = DEPARTMENT_ROLE_MAP[dept] ?? "office";
-
     return {
       id: item.id,
       name: item.name,
-      department: dept || undefined,
-      manager: getColumnText(item, "person") || undefined,
-      email: getColumnText(item, "email") || undefined,
-      phone: getColumnText(item, "phone") || undefined,
-      status: getColumnText(item, "status__1") || undefined,
-      startDate: getColumnText(item, "date") || undefined,
-      location: getColumnText(item, "location") || undefined,
-      pto: parseFloat(getColumnText(item, "numbers")) || undefined,
-      role,
+      department: undefined,
+      manager: undefined,
+      email: getColumnText(item, "email_mm0gqxr2") || undefined,
+      phone: getColumnText(item, "text_mm0g18g2") || undefined,
+      status: getColumnText(item, "status") || undefined,
+      startDate: undefined,
+      location: getColumnText(item, "text_mm0gy9yb") || undefined,
+      pto: undefined,
+      role: "office" as UserRole,
     };
   });
 }
@@ -276,13 +268,13 @@ export function transformEmployees(items: MondayItem[]): Employee[] {
  * Compute dashboard KPIs from project and task data.
  */
 export function computeKPIs(projects: Project[], tasks: Task[], events: CalendarEvent[]): DashboardKPIs {
-  const activeGroups = ["RELEASED", "Submitted for Production"];
-  const pipelineGroups = ["PROPOSAL FOLLOW UP TO CLOSE"];
+  const activeGroups = ["RELEASED", "Submitted for Production", "Released"];
+  const pipelineGroups = ["PROPOSAL FOLLOW UP TO CLOSE", "Proposal Follow Up To Close"];
 
   return {
-    activeInstalls: projects.filter((p) => activeGroups.includes(p.group)).length,
+    activeInstalls: projects.filter((p) => activeGroups.some(g => p.group.toUpperCase() === g.toUpperCase())).length,
     revenuePipeline: projects
-      .filter((p) => pipelineGroups.includes(p.group))
+      .filter((p) => pipelineGroups.some(g => p.group.toUpperCase() === g.toUpperCase()))
       .reduce((sum, p) => sum + (p.totalPrice ?? 0), 0),
     overdueTasks: tasks.filter((t) => t.status === "overdue").length,
     upcomingEvents: events.filter((e) => {
