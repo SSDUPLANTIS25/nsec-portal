@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, LogOut, ChevronRight } from "lucide-react";
+import { Bell, Search, LogOut, ChevronRight, Command } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -35,27 +35,27 @@ export default function TopBar() {
   const pageLabel = PAGE_LABELS[pathname] || pathname.split("/").pop()?.replace(/-/g, " ") || "";
 
   const roleBadgeColor =
-    user.role === "field" ? "bg-emerald-500/20 text-emerald-300" :
-    user.role === "office" ? "bg-purple-500/20 text-purple-300" :
-    "bg-orange-500/20 text-orange-300";
+    user.role === "field" ? "bg-emerald-100 text-emerald-700" :
+    user.role === "office" ? "bg-purple-100 text-purple-700" :
+    "bg-orange-100 text-orange-700";
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 z-50 bg-navy-900 text-white h-14 flex items-center px-4 gap-3">
+      <header className="fixed top-0 inset-x-0 z-50 bg-navy-900 h-14 flex items-center px-4 gap-2">
         {/* Logo / Brand */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-brand-blue flex items-center justify-center text-xs font-bold">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-brand-blue flex items-center justify-center text-white text-xs font-bold">
             NS
           </div>
-          <span className="text-sm font-semibold hidden sm:inline">NSEC Portal</span>
+          <span className="text-sm font-semibold text-white hidden sm:inline tracking-tight">NSEC Portal</span>
         </div>
 
         {/* Desktop breadcrumb */}
-        <nav className="hidden lg:flex items-center gap-1.5 text-xs text-navy-300 ml-4 flex-1 min-w-0">
-          <Link href="/dashboard" className="hover:text-white transition-colors">Home</Link>
+        <nav className="hidden lg:flex items-center gap-1.5 text-xs text-navy-400 ml-6 flex-1 min-w-0">
+          <Link href="/dashboard" className="hover:text-navy-200 transition-colors">Home</Link>
           {pathname !== "/dashboard" && (
             <>
-              <ChevronRight className="w-3 h-3 text-navy-500" />
+              <ChevronRight className="w-3 h-3 text-navy-600" />
               <span className="text-white font-medium capitalize truncate">{pageLabel}</span>
             </>
           )}
@@ -64,26 +64,35 @@ export default function TopBar() {
         {/* Spacer for mobile */}
         <div className="flex-1 lg:hidden" />
 
-        {/* Role badge (desktop) */}
-        <span className={`hidden lg:flex text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize ${roleBadgeColor}`}>
+        {/* Desktop search hint */}
+        <button className="hidden lg:flex items-center gap-2 h-8 pl-3 pr-2 rounded-lg bg-white/[0.07] border border-white/[0.08] text-navy-400 text-xs hover:bg-white/10 hover:text-navy-200 transition-all cursor-pointer">
+          <Search className="w-3.5 h-3.5" />
+          <span>Search...</span>
+          <kbd className="flex items-center gap-0.5 text-[10px] text-navy-500 bg-white/5 px-1.5 py-0.5 rounded font-mono ml-4">
+            <Command className="w-2.5 h-2.5" />K
+          </kbd>
+        </button>
+
+        {/* Role badge */}
+        <span className={`hidden lg:flex text-[11px] font-semibold px-2.5 py-1 rounded-md capitalize ${roleBadgeColor}`}>
           {user.role}
         </span>
 
-        {/* Right actions */}
+        {/* Notifications */}
         <button className="p-2 rounded-lg hover:bg-white/10 transition-colors relative" aria-label="Notifications">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-brand-red text-[10px] font-bold flex items-center justify-center">
-            5
-          </span>
+          <Bell className="w-[18px] h-[18px] text-navy-300" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-red ring-2 ring-navy-900" />
         </button>
 
-        <button className="p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Search">
-          <Search className="w-5 h-5" />
+        {/* Mobile search */}
+        <button className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden" aria-label="Search">
+          <Search className="w-[18px] h-[18px] text-navy-300" />
         </button>
 
+        {/* Profile avatar */}
         <button
           onClick={() => setShowProfile(!showProfile)}
-          className="w-8 h-8 rounded-full bg-brand-blue/80 flex items-center justify-center text-sm font-bold hover:bg-brand-blue transition-colors"
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-700 flex items-center justify-center text-sm font-semibold text-white hover:ring-2 hover:ring-brand-blue/50 transition-all"
           aria-label="Profile"
         >
           {user.name.charAt(0)}
@@ -94,23 +103,32 @@ export default function TopBar() {
       {showProfile && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowProfile(false)} />
-          <div className="fixed top-14 right-2 z-50 bg-white rounded-xl shadow-xl border border-gray-100 w-64 p-4 animate-fadeIn">
-            <div className="mb-3">
-              <p className="font-semibold text-gray-900 text-sm">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
+          <div className="fixed top-[60px] right-3 z-50 bg-white rounded-xl shadow-xl border border-border w-72 animate-scaleIn overflow-hidden">
+            {/* User info header */}
+            <div className="px-4 pt-4 pb-3 border-b border-border-light">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-blue to-blue-700 text-white text-sm font-semibold flex items-center justify-center shrink-0">
+                  {user.name.charAt(0)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 text-sm truncate">{user.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="border-t border-gray-100 pt-3 mb-3">
-              <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-2">Demo: Switch Role</p>
-              <div className="flex gap-1">
+            {/* Role switcher */}
+            <div className="px-4 py-3 border-b border-border-light">
+              <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-2">Demo: Switch Role</p>
+              <div className="flex gap-1.5">
                 {(["field", "office", "management"] as const).map((r) => (
                   <button
                     key={r}
                     onClick={() => { switchRole(r); setShowProfile(false); }}
-                    className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${
+                    className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-all ${
                       user.role === r
-                        ? "bg-brand-blue text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        ? "bg-brand-blue text-white shadow-sm"
+                        : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     {r === "field" ? "Field" : r === "office" ? "Office" : "Mgmt"}
@@ -119,13 +137,16 @@ export default function TopBar() {
               </div>
             </div>
 
-            <button
-              onClick={() => { logout(); setShowProfile(false); }}
-              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium w-full py-1"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
+            {/* Sign out */}
+            <div className="px-4 py-3">
+              <button
+                onClick={() => { logout(); setShowProfile(false); }}
+                className="flex items-center gap-2 text-sm text-gray-600 hover:text-red-600 font-medium w-full py-1 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign out
+              </button>
+            </div>
           </div>
         </>
       )}

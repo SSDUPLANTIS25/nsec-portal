@@ -26,7 +26,7 @@ export default function BottomTabBar({ onQuickCreate }: Props) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 pb-safe lg:hidden">
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-border pb-safe lg:hidden">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {tabs.map((tab) => {
           if (tab.href === "__action__") {
@@ -37,8 +37,8 @@ export default function BottomTabBar({ onQuickCreate }: Props) {
                 className="flex flex-col items-center justify-center -mt-5"
                 aria-label="Quick create"
               >
-                <span className="flex items-center justify-center w-14 h-14 rounded-full bg-brand-blue text-white shadow-lg shadow-blue-200 active:scale-95 transition-transform">
-                  <Plus className="w-7 h-7" />
+                <span className="flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-blue text-white shadow-lg shadow-blue-500/20 active:scale-95 transition-transform">
+                  <Plus className="w-6 h-6" />
                 </span>
               </button>
             );
@@ -54,8 +54,8 @@ export default function BottomTabBar({ onQuickCreate }: Props) {
                 active ? "text-brand-blue" : "text-gray-400"
               }`}
             >
-              <tab.Icon className={`w-6 h-6 transition-all ${active ? "stroke-[2.5] text-brand-blue" : "text-gray-400 stroke-[1.5]"}`} />
-              <span className={`text-[11px] transition-colors ${active ? "font-bold text-brand-blue" : "font-medium text-gray-400"}`}>{tab.label}</span>
+              <tab.Icon className={`w-[22px] h-[22px] transition-all ${active ? "stroke-[2.5] text-brand-blue" : "text-gray-400 stroke-[1.5]"}`} />
+              <span className={`text-[10px] transition-colors ${active ? "font-semibold text-brand-blue" : "font-medium text-gray-400"}`}>{tab.label}</span>
             </Link>
           );
         })}

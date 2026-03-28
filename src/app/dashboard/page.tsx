@@ -25,6 +25,7 @@ import {
   Award,
   Target,
   Percent,
+  Zap,
 } from "lucide-react";
 import { useMondayData } from "@/lib/use-monday-data";
 import type { Task, CalendarEvent, Alert, DashboardKPIs, Project, Installation, Order } from "@/lib/monday-types";
@@ -49,10 +50,12 @@ export default function DashboardPage() {
 
   if (tasksError) {
     return (
-      <div className="px-4 py-12 max-w-lg lg:max-w-5xl mx-auto text-center">
-        <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
-        <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
+      <div className="px-4 py-16 max-w-lg lg:max-w-5xl mx-auto text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-6 h-6 text-amber-500" />
+        </div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Monday.com Not Connected</h2>
+        <p className="text-sm text-gray-500 max-w-xs mx-auto">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
       </div>
     );
   }
@@ -60,9 +63,9 @@ export default function DashboardPage() {
   const loading = tasksLoading || eventsLoading || alertsLoading || kpisLoading || projectsLoading || installsLoading || ordersLoading;
   if (loading) {
     return (
-      <div className="px-4 py-12 max-w-lg lg:max-w-5xl mx-auto text-center">
-        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Loading Mission Control...</p>
+      <div className="px-4 py-16 max-w-lg lg:max-w-5xl mx-auto text-center">
+        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm text-gray-500">Loading dashboard...</p>
       </div>
     );
   }
@@ -78,7 +81,6 @@ export default function DashboardPage() {
   };
   const totalActive = taskCounts.overdue + taskCounts.not_viewed + taskCounts.in_progress + taskCounts.pending;
 
-  // Procurement summary
   const allOrders = orders ?? [];
   const receivedYesterday = allOrders.filter((o) => {
     if (o.status !== "Received" || !o.eta) return false;
@@ -93,12 +95,10 @@ export default function DashboardPage() {
     return new Date(o.eta) < new Date(today);
   }).length;
 
-  // Installation summary
   const allInstalls = installations ?? [];
   const activeInstalls = allInstalls.filter((i) => i.jobStatus !== "Totally Complete");
   const completedInstalls = allInstalls.filter((i) => i.jobStatus === "Totally Complete");
 
-  // Project pipeline summary
   const allProjects = projects ?? [];
   const pipelineGroups = ["PROPOSAL FOLLOW UP TO CLOSE", "CLOSE"];
   const activeProjectGroups = ["RELEASED", "Submitted for Production"];
@@ -109,100 +109,106 @@ export default function DashboardPage() {
   const totalProjects = allProjects.length;
 
   return (
-    <div className="px-4 py-4 space-y-4 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
+    <div className="px-4 lg:px-6 py-5 space-y-5 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       {/* Greeting */}
       <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">
           {getGreeting()}, {user.name.split(" ")[0]}
         </h1>
-        <p className="text-sm text-gray-500 mt-0.5">Mission Control</p>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Here&apos;s what&apos;s happening across your projects today.
+        </p>
       </div>
 
       {/* Urgent Alerts */}
       {(alerts ?? []).length > 0 && (
-        <section>
-          <div className="space-y-2">
-            {(alerts ?? []).slice(0, 3).map((alert) => (
-              <div
-                key={alert.id}
-                className={`rounded-xl p-3 flex items-start gap-3 ${
-                  alert.type === "urgent"
-                    ? "bg-red-50 border border-red-100"
-                    : "bg-amber-50 border border-amber-100"
-                }`}
-              >
-                <AlertTriangle
-                  className={`w-5 h-5 shrink-0 mt-0.5 ${
-                    alert.type === "urgent" ? "text-red-500" : "text-amber-500"
-                  }`}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-gray-900">{alert.title}</p>
-                  <p className="text-xs text-gray-600 mt-0.5">{alert.message}</p>
-                </div>
+        <section className="space-y-2">
+          {(alerts ?? []).slice(0, 3).map((alert) => (
+            <div
+              key={alert.id}
+              className={`rounded-xl p-3.5 flex items-start gap-3 ${
+                alert.type === "urgent"
+                  ? "bg-red-50 border border-red-100"
+                  : "bg-amber-50 border border-amber-100"
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                alert.type === "urgent" ? "bg-red-100" : "bg-amber-100"
+              }`}>
+                <AlertTriangle className={`w-4 h-4 ${alert.type === "urgent" ? "text-red-500" : "text-amber-500"}`} />
               </div>
-            ))}
-          </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-gray-900">{alert.title}</p>
+                <p className="text-xs text-gray-600 mt-0.5">{alert.message}</p>
+              </div>
+            </div>
+          ))}
         </section>
       )}
 
-      {/* Summary Row — quick glance cards */}
+      {/* Summary Row */}
       <section>
-        <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
-          <Link href="/tasks" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
-            <CheckCircle2 className="w-5 h-5 text-brand-blue mx-auto mb-1" />
-            <p className="text-xl font-bold text-gray-900">{totalActive}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Active Tasks</p>
+        <div className="grid grid-cols-3 lg:grid-cols-3 gap-3">
+          <Link href="/tasks" className="card p-4 text-center active:scale-[0.98] transition-all card-hover">
+            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center mx-auto mb-2">
+              <CheckCircle2 className="w-[18px] h-[18px] text-brand-blue" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{totalActive}</p>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">Active Tasks</p>
           </Link>
-          <Link href="/calendar" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
-            <Calendar className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-            <p className="text-xl font-bold text-gray-900">{todayEvents.length}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Today&apos;s Events</p>
+          <Link href="/calendar" className="card p-4 text-center active:scale-[0.98] transition-all card-hover">
+            <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center mx-auto mb-2">
+              <Calendar className="w-[18px] h-[18px] text-purple-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{todayEvents.length}</p>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">Today&apos;s Events</p>
           </Link>
-          <Link href="/projects" className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center active:scale-[0.98] transition-all card-hover">
-            <Briefcase className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-            <p className="text-xl font-bold text-gray-900">{activeProjectCount}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Active Projects</p>
+          <Link href="/projects" className="card p-4 text-center active:scale-[0.98] transition-all card-hover">
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mx-auto mb-2">
+              <Briefcase className="w-[18px] h-[18px] text-emerald-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{activeProjectCount}</p>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">Active Projects</p>
           </Link>
         </div>
       </section>
 
-      {/* Desktop 2-column layout for middle sections */}
-      <div className="lg:grid lg:grid-cols-2 lg:gap-6 space-y-4 lg:space-y-0">
+      {/* Desktop 2-column layout */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-5 space-y-5 lg:space-y-0">
 
-      {/* Left column on desktop */}
-      <div className="space-y-4">
+      {/* Left column */}
+      <div className="space-y-5">
 
       {/* Task Status Breakdown */}
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700">Tasks</h2>
-          <Link href="/tasks" className="text-xs text-brand-blue font-medium flex items-center gap-0.5">
+        <div className="section-header">
+          <h2 className="section-title">Tasks</h2>
+          <Link href="/tasks" className="section-link">
             View all <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         <div className="grid grid-cols-5 gap-2">
-          <TaskBadge icon={<AlertTriangle className="w-4 h-4" />} count={taskCounts.overdue} label="Overdue" color="text-red-600 bg-red-50" />
-          <TaskBadge icon={<EyeOff className="w-4 h-4" />} count={taskCounts.not_viewed} label="New" color="text-blue-600 bg-blue-50" />
-          <TaskBadge icon={<Eye className="w-4 h-4" />} count={taskCounts.in_progress} label="Active" color="text-emerald-600 bg-emerald-50" />
-          <TaskBadge icon={<Clock className="w-4 h-4" />} count={taskCounts.pending} label="Pending" color="text-amber-600 bg-amber-50" />
-          <TaskBadge icon={<CheckCircle2 className="w-4 h-4" />} count={taskCounts.complete} label="Done" color="text-gray-500 bg-gray-100" />
+          <TaskBadge icon={<AlertTriangle className="w-4 h-4" />} count={taskCounts.overdue} label="Overdue" color="text-red-600 bg-red-50 border border-red-100" />
+          <TaskBadge icon={<EyeOff className="w-4 h-4" />} count={taskCounts.not_viewed} label="New" color="text-blue-600 bg-blue-50 border border-blue-100" />
+          <TaskBadge icon={<Eye className="w-4 h-4" />} count={taskCounts.in_progress} label="Active" color="text-emerald-600 bg-emerald-50 border border-emerald-100" />
+          <TaskBadge icon={<Clock className="w-4 h-4" />} count={taskCounts.pending} label="Pending" color="text-amber-600 bg-amber-50 border border-amber-100" />
+          <TaskBadge icon={<CheckCircle2 className="w-4 h-4" />} count={taskCounts.complete} label="Done" color="text-gray-500 bg-gray-50 border border-gray-100" />
         </div>
       </section>
 
       {/* Today's Schedule */}
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700">Today&apos;s Schedule</h2>
-          <Link href="/calendar" className="text-xs text-brand-blue font-medium flex items-center gap-0.5">
+        <div className="section-header">
+          <h2 className="section-title">Today&apos;s Schedule</h2>
+          <Link href="/calendar" className="section-link">
             Full calendar <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         {todayEvents.length > 0 ? (
           <div className="space-y-2">
             {todayEvents.slice(0, 4).map((event) => (
-              <div key={event.id} className="bg-white rounded-xl p-3 border border-gray-100 flex items-start gap-3 shadow-sm">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${eventColor(event.type)}`}>
+              <div key={event.id} className="card p-3 flex items-start gap-3">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${eventColor(event.type)}`}>
                   {eventIcon(event.type)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -220,7 +226,8 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+          <div className="card p-6 text-center">
+            <Calendar className="w-8 h-8 text-gray-200 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No events scheduled today</p>
           </div>
         )}
@@ -228,32 +235,38 @@ export default function DashboardPage() {
 
       </div>{/* end left column */}
 
-      {/* Right column on desktop */}
-      <div className="space-y-4">
+      {/* Right column */}
+      <div className="space-y-5">
 
       {/* Procurement Orders */}
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700">Procurement</h2>
-          <Link href="/more" className="text-xs text-brand-blue font-medium flex items-center gap-0.5">
+        <div className="section-header">
+          <h2 className="section-title">Procurement</h2>
+          <Link href="/more" className="section-link">
             All orders <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center">
-            <Package className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
+          <div className="card p-3 text-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mx-auto mb-1.5">
+              <Package className="w-4 h-4 text-emerald-600" />
+            </div>
             <p className="text-lg font-bold text-gray-900">{receivedYesterday}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Received</p>
+            <p className="text-[11px] text-gray-500 font-medium">Received</p>
           </div>
-          <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm text-center">
-            <ShoppingCart className="w-5 h-5 text-brand-blue mx-auto mb-1" />
+          <div className="card p-3 text-center">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mx-auto mb-1.5">
+              <ShoppingCart className="w-4 h-4 text-brand-blue" />
+            </div>
             <p className="text-lg font-bold text-gray-900">{expectedToday}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Expected Today</p>
+            <p className="text-[11px] text-gray-500 font-medium">Expected Today</p>
           </div>
-          <div className={`rounded-xl p-3 border shadow-sm text-center ${overdueOrders > 0 ? "bg-red-50 border-red-100" : "bg-white border-gray-100"}`}>
-            <AlertTriangle className={`w-5 h-5 mx-auto mb-1 ${overdueOrders > 0 ? "text-red-500" : "text-gray-300"}`} />
+          <div className={`card p-3 text-center ${overdueOrders > 0 ? "!bg-red-50 !border-red-100" : ""}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5 ${overdueOrders > 0 ? "bg-red-100" : "bg-gray-50"}`}>
+              <AlertTriangle className={`w-4 h-4 ${overdueOrders > 0 ? "text-red-500" : "text-gray-300"}`} />
+            </div>
             <p className={`text-lg font-bold ${overdueOrders > 0 ? "text-red-600" : "text-gray-900"}`}>{overdueOrders}</p>
-            <p className="text-[10px] text-gray-500 font-medium">Overdue</p>
+            <p className="text-[11px] text-gray-500 font-medium">Overdue</p>
           </div>
         </div>
       </section>
@@ -261,31 +274,37 @@ export default function DashboardPage() {
       {/* YTD Performance — management only */}
       {user.role === "management" && kpis && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">Performance</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="section-header">
+            <h2 className="section-title">Performance</h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2">
             <KPICard
               label="Revenue Pipeline"
               value={formatCurrency(pipelineValue)}
-              sub={`${pipelineProjects.length} proposals pending`}
-              icon={<DollarSign className="w-4 h-4 text-green-500" />}
+              sub={`${pipelineProjects.length} proposals`}
+              icon={<DollarSign className="w-4 h-4" />}
+              color="bg-emerald-50 text-emerald-600"
             />
             <KPICard
               label="Active Installs"
               value={String(activeInstalls.length)}
               sub={`${completedInstalls.length} completed`}
-              icon={<Wrench className="w-4 h-4 text-blue-500" />}
+              icon={<Wrench className="w-4 h-4" />}
+              color="bg-blue-50 text-blue-600"
             />
             <KPICard
               label="Projects Won"
               value={String(wonProjects.length)}
               sub={`of ${totalProjects} total`}
-              icon={<Award className="w-4 h-4 text-amber-500" />}
+              icon={<Award className="w-4 h-4" />}
+              color="bg-amber-50 text-amber-600"
             />
             <KPICard
               label="Overdue Tasks"
               value={String(taskCounts.overdue)}
               sub={taskCounts.overdue > 0 ? "Needs attention" : "All clear"}
-              icon={<AlertTriangle className="w-4 h-4 text-red-500" />}
+              icon={<AlertTriangle className="w-4 h-4" />}
+              color={taskCounts.overdue > 0 ? "bg-red-50 text-red-500" : "bg-gray-50 text-gray-400"}
             />
           </div>
         </section>
@@ -294,30 +313,30 @@ export default function DashboardPage() {
       </div>{/* end right column */}
       </div>{/* end 2-column layout */}
 
-      {/* Below: full-width sections */}
       {/* Installation Summary */}
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700">Installations</h2>
-          <Link href="/installations" className="text-xs text-brand-blue font-medium flex items-center gap-0.5">
+        <div className="section-header">
+          <h2 className="section-title">Installations</h2>
+          <Link href="/installations" className="section-link">
             Schedule <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="card overflow-hidden">
           {activeInstalls.slice(0, 4).map((install, i) => (
-            <div key={install.id} className={`p-3 flex items-center gap-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
-              <div className={`w-2 h-8 rounded-full shrink-0 ${installStatusColor(install.jobStatus)}`} />
+            <div key={install.id} className={`p-3.5 flex items-center gap-3 ${i > 0 ? "border-t border-border-light" : ""} hover:bg-gray-50/50 transition-colors`}>
+              <div className={`w-1.5 h-8 rounded-full shrink-0 ${installStatusColor(install.jobStatus)}`} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{install.name}</p>
                 <p className="text-xs text-gray-400">{install.date ? formatDateShort(install.date) : "TBD"} {install.projectManager ? `· ${install.projectManager}` : ""}</p>
               </div>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${installBadge(install.jobStatus)}`}>
+              <span className={`text-[11px] font-medium px-2.5 py-1 rounded-md whitespace-nowrap ${installBadge(install.jobStatus)}`}>
                 {install.jobStatus}
               </span>
             </div>
           ))}
           {activeInstalls.length === 0 && (
-            <div className="p-4 text-center">
+            <div className="p-8 text-center">
+              <Wrench className="w-8 h-8 text-gray-200 mx-auto mb-2" />
               <p className="text-sm text-gray-400">No active installations</p>
             </div>
           )}
@@ -327,11 +346,13 @@ export default function DashboardPage() {
       {/* Field-specific: Route for the day */}
       {user.role === "field" && (
         <section>
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">Your Route</h2>
-          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+          <div className="section-header">
+            <h2 className="section-title">Your Route</h2>
+          </div>
+          <div className="card overflow-hidden">
             {todayEvents.filter(e => e.location).map((event, i) => (
-              <div key={event.id} className={`p-3 flex items-center gap-3 ${i > 0 ? "border-t border-gray-50" : ""}`}>
-                <div className="w-7 h-7 rounded-full bg-brand-blue text-white text-xs font-bold flex items-center justify-center shrink-0">
+              <div key={event.id} className={`p-3.5 flex items-center gap-3 ${i > 0 ? "border-t border-border-light" : ""} hover:bg-gray-50/50 transition-colors`}>
+                <div className="w-7 h-7 rounded-full bg-brand-blue text-white text-xs font-semibold flex items-center justify-center shrink-0">
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -342,7 +363,8 @@ export default function DashboardPage() {
               </div>
             ))}
             {todayEvents.filter(e => e.location).length === 0 && (
-              <div className="p-4 text-center">
+              <div className="p-8 text-center">
+                <MapPin className="w-8 h-8 text-gray-200 mx-auto mb-2" />
                 <p className="text-sm text-gray-400">No routes today</p>
               </div>
             )}
@@ -352,23 +374,27 @@ export default function DashboardPage() {
 
       {/* Priority Items */}
       <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-700">Priority Items</h2>
+        <div className="section-header">
+          <h2 className="section-title flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-500" />
+            Priority Items
+          </h2>
         </div>
         <div className="space-y-2">
           {(tasks ?? []).filter(t => t.priority === "high").slice(0, 5).map((task) => (
-            <div key={task.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-1">
+            <div key={task.id} className="card p-3.5">
+              <div className="flex items-center gap-2 mb-1.5">
                 <span className={`w-2 h-2 rounded-full ${statusDot(task.status)}`} />
-                <span className="text-xs font-medium text-gray-400 uppercase">{task.status.replace("_", " ")}</span>
-                <span className="text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">HIGH</span>
+                <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wide">{task.status.replace("_", " ")}</span>
+                <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100">HIGH</span>
               </div>
               <p className="text-sm font-medium text-gray-900">{task.title}</p>
               <p className="text-xs text-gray-500 mt-1">Due {task.dueDate ? formatDateShort(task.dueDate) : "TBD"} · {task.assignee}</p>
             </div>
           ))}
           {(tasks ?? []).filter(t => t.priority === "high").length === 0 && (
-            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+            <div className="card p-8 text-center">
+              <CheckCircle2 className="w-8 h-8 text-gray-200 mx-auto mb-2" />
               <p className="text-sm text-gray-400">No high-priority items</p>
             </div>
           )}
@@ -387,9 +413,9 @@ function getGreeting() {
 
 function TaskBadge({ icon, count, label, color }: { icon: React.ReactNode; count: number; label: string; color: string }) {
   return (
-    <div className={`flex flex-col items-center py-2.5 rounded-xl ${color}`}>
+    <div className={`flex flex-col items-center py-3 rounded-xl ${color}`}>
       {icon}
-      <span className="text-lg font-bold mt-0.5">{count}</span>
+      <span className="text-lg font-bold mt-1 tracking-tight">{count}</span>
       <span className="text-[10px] font-medium opacity-70">{label}</span>
     </div>
   );
@@ -406,14 +432,16 @@ function formatDateShort(d: string) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function KPICard({ label, value, sub, icon }: { label: string; value: string; sub: string; icon: React.ReactNode }) {
+function KPICard({ label, value, sub, icon, color }: { label: string; value: string; sub: string; icon: React.ReactNode; color: string }) {
   return (
-    <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm card-hover">
-      <div className="flex items-center gap-1.5 mb-1">
-        {icon}
+    <div className="card p-3.5 card-hover">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${color}`}>
+          {icon}
+        </div>
         <span className="text-xs text-gray-500 font-medium">{label}</span>
       </div>
-      <p className="text-xl font-bold text-gray-900">{value}</p>
+      <p className="text-xl font-bold text-gray-900 tracking-tight">{value}</p>
       <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
     </div>
   );
@@ -421,21 +449,21 @@ function KPICard({ label, value, sub, icon }: { label: string; value: string; su
 
 function eventColor(type: string) {
   switch (type) {
-    case "installation": return "bg-blue-100 text-blue-600";
-    case "meeting": return "bg-purple-100 text-purple-600";
-    case "delivery": return "bg-amber-100 text-amber-600";
-    case "training": return "bg-green-100 text-green-600";
-    default: return "bg-gray-100 text-gray-600";
+    case "installation": return "bg-blue-50 text-blue-600";
+    case "meeting": return "bg-purple-50 text-purple-600";
+    case "delivery": return "bg-amber-50 text-amber-600";
+    case "training": return "bg-green-50 text-green-600";
+    default: return "bg-gray-50 text-gray-600";
   }
 }
 
 function eventIcon(type: string) {
   switch (type) {
-    case "installation": return <Users className="w-5 h-5" />;
-    case "meeting": return <MessageSquare className="w-5 h-5" />;
-    case "delivery": return <Package className="w-5 h-5" />;
-    case "training": return <CheckCircle2 className="w-5 h-5" />;
-    default: return <Calendar className="w-5 h-5" />;
+    case "installation": return <Users className="w-[18px] h-[18px]" />;
+    case "meeting": return <MessageSquare className="w-[18px] h-[18px]" />;
+    case "delivery": return <Package className="w-[18px] h-[18px]" />;
+    case "training": return <CheckCircle2 className="w-[18px] h-[18px]" />;
+    default: return <Calendar className="w-[18px] h-[18px]" />;
   }
 }
 
@@ -461,9 +489,9 @@ function installStatusColor(status: string) {
 
 function installBadge(status: string) {
   switch (status) {
-    case "Totally Complete": return "bg-emerald-50 text-emerald-600";
-    case "Phase Done": return "bg-amber-50 text-amber-600";
-    case "In Progress": return "bg-blue-50 text-blue-600";
-    default: return "bg-gray-50 text-gray-600";
+    case "Totally Complete": return "bg-emerald-50 text-emerald-700 border border-emerald-100";
+    case "Phase Done": return "bg-amber-50 text-amber-700 border border-amber-100";
+    case "In Progress": return "bg-blue-50 text-blue-700 border border-blue-100";
+    default: return "bg-gray-50 text-gray-600 border border-gray-100";
   }
 }

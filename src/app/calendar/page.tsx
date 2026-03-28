@@ -21,9 +21,11 @@ export default function CalendarPage() {
 
   if (error) {
     return (
-      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
-        <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
-        <h2 className="text-lg font-bold text-gray-900 mb-1">Monday.com Not Connected</h2>
+      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+        <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-6 h-6 text-amber-500" />
+        </div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Monday.com Not Connected</h2>
         <p className="text-sm text-gray-500">Set the MONDAY_API_KEY environment variable to connect your NSEC workspace.</p>
       </div>
     );
@@ -31,28 +33,25 @@ export default function CalendarPage() {
 
   if (loading || !calendarEvents) {
     return (
-      <div className="px-4 py-12 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
-        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-gray-500">Loading calendar from Monday.com...</p>
+      <div className="px-4 py-16 max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto text-center">
+        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-sm text-gray-500">Loading calendar...</p>
       </div>
     );
   }
 
   const dayEvents = calendarEvents.filter((e) => e.date === selectedDate);
 
-  // Installation status summary — matching Replit's On Track / At Risk / Overdue cards
   const installEvents = calendarEvents.filter((e) => e.type === "installation");
   const onTrack = installEvents.filter((e) => new Date(e.date) >= new Date(today)).length;
   const overdue = installEvents.filter((e) => new Date(e.date) < new Date(today)).length;
-  const atRisk = 0; // Could be computed from installations nearing deadline
+  const atRisk = 0;
 
-  // Upcoming installations for the sidebar
   const upcomingInstalls = (installations ?? [])
     .filter((i) => i.jobStatus !== "Totally Complete" && i.date)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 6);
 
-  // Month grid
   const baseDate = new Date(selectedDate + "T12:00:00");
   const year = baseDate.getFullYear();
   const month = baseDate.getMonth();
@@ -84,79 +83,79 @@ export default function CalendarPage() {
   return (
     <div className="max-w-lg lg:max-w-5xl xl:max-w-6xl mx-auto">
       {/* Page header */}
-      <div className="px-4 pt-3 pb-1">
-        <h1 className="text-xl font-bold text-gray-900">Installation Calendar</h1>
-        <p className="text-xs text-gray-500 mt-0.5">Schedule and track installation crews</p>
+      <div className="px-4 lg:px-6 pt-5 pb-2">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">Installation Calendar</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Schedule and track installation crews</p>
       </div>
 
-      {/* Status summary cards — large colored backgrounds like Replit */}
-      <div className="px-4 pt-2 pb-3">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-emerald-50 rounded-xl p-3 flex items-center justify-between">
+      {/* Status summary cards */}
+      <div className="px-4 lg:px-6 pt-2 pb-4">
+        <div className="grid grid-cols-3 gap-2.5">
+          <div className="bg-emerald-50 rounded-xl stat-card">
             <div>
-              <p className="text-[10px] text-emerald-600 font-medium">On Track</p>
-              <p className="text-2xl font-bold text-emerald-700">{onTrack}</p>
+              <p className="stat-label text-emerald-600">On Track</p>
+              <p className="stat-value text-emerald-700">{onTrack}</p>
             </div>
-            <CheckCircle2 className="w-7 h-7 text-emerald-300" />
+            <CheckCircle2 className="w-6 h-6 text-emerald-300" />
           </div>
-          <div className="bg-amber-50 rounded-xl p-3 flex items-center justify-between">
+          <div className="bg-amber-50 rounded-xl stat-card">
             <div>
-              <p className="text-[10px] text-amber-600 font-medium">At Risk</p>
-              <p className="text-2xl font-bold text-amber-700">{atRisk}</p>
+              <p className="stat-label text-amber-600">At Risk</p>
+              <p className="stat-value text-amber-700">{atRisk}</p>
             </div>
-            <AlertTriangle className="w-7 h-7 text-amber-300" />
+            <AlertTriangle className="w-6 h-6 text-amber-300" />
           </div>
-          <div className={`rounded-xl p-3 flex items-center justify-between ${overdue > 0 ? "bg-red-50" : "bg-gray-50"}`}>
+          <div className={`rounded-xl stat-card ${overdue > 0 ? "bg-red-50" : "bg-gray-50"}`}>
             <div>
-              <p className={`text-[10px] font-medium ${overdue > 0 ? "text-red-600" : "text-gray-500"}`}>Overdue</p>
-              <p className={`text-2xl font-bold ${overdue > 0 ? "text-red-700" : "text-gray-400"}`}>{overdue}</p>
+              <p className={`stat-label ${overdue > 0 ? "text-red-600" : "text-gray-500"}`}>Overdue</p>
+              <p className={`stat-value ${overdue > 0 ? "text-red-700" : "text-gray-400"}`}>{overdue}</p>
             </div>
-            <AlertTriangle className={`w-7 h-7 ${overdue > 0 ? "text-red-300" : "text-gray-300"}`} />
+            <AlertTriangle className={`w-6 h-6 ${overdue > 0 ? "text-red-300" : "text-gray-300"}`} />
           </div>
         </div>
       </div>
 
       {/* Calendar View heading */}
-      <div className="px-4 pb-1">
-        <p className="text-sm font-semibold text-gray-700">Calendar View</p>
-        <p className="text-[10px] text-gray-400">Color-coded by deadline status</p>
+      <div className="px-4 lg:px-6 pb-1">
+        <p className="section-title">Calendar View</p>
+        <p className="text-[11px] text-gray-400 mt-0.5">Color-coded by deadline status</p>
       </div>
 
       {/* Desktop: side-by-side calendar + events */}
-      <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:px-4">
+      <div className="lg:grid lg:grid-cols-5 lg:gap-6 lg:px-6">
       <div className="lg:col-span-3">
 
-      {/* Month header with navigation */}
-      <div className="flex items-center justify-between px-4 py-2">
-        <button onClick={() => shiftMonth(-1)} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Previous month">
+      {/* Month header */}
+      <div className="flex items-center justify-between px-4 lg:px-0 py-3">
+        <button onClick={() => shiftMonth(-1)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Previous month">
           <ChevronLeft className="w-5 h-5 text-gray-500" />
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <h2 className="text-sm font-semibold text-gray-700">
             {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" })}
           </h2>
           <button
             onClick={() => setSelectedDate(today)}
-            className="px-2 py-0.5 text-[10px] font-medium text-brand-blue bg-blue-50 rounded-md"
+            className="px-2.5 py-1 text-[11px] font-medium text-brand-blue bg-blue-50 rounded-md border border-blue-100 hover:bg-blue-100 transition-colors"
           >
             Today
           </button>
         </div>
-        <button onClick={() => shiftMonth(1)} className="p-2 rounded-lg hover:bg-gray-100" aria-label="Next month">
+        <button onClick={() => shiftMonth(1)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Next month">
           <ChevronRight className="w-5 h-5 text-gray-500" />
         </button>
       </div>
 
       {/* Month Grid */}
-      <div className="px-4 pb-2">
+      <div className="px-4 lg:px-0 pb-3">
         <div className="grid grid-cols-7 mb-1">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-            <div key={d} className="text-center text-[10px] font-medium text-gray-400 py-1">{d}</div>
+            <div key={d} className="text-center text-[11px] font-medium text-gray-400 py-1">{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden">
+        <div className="grid grid-cols-7 gap-px bg-border rounded-xl overflow-hidden">
           {calendarCells.map((day, i) => {
-            if (day === null) return <div key={i} className="h-11 bg-gray-50" />;
+            if (day === null) return <div key={i} className="h-11 bg-gray-50/50" />;
             const dateStr = getDateStr(day);
             const isSelected = dateStr === selectedDate;
             const isToday = dateStr === today;
@@ -171,7 +170,7 @@ export default function CalendarPage() {
                     ? "bg-brand-blue text-white z-10 ring-2 ring-brand-blue"
                     : isToday
                     ? "bg-blue-50 text-brand-blue font-bold hover:bg-blue-100"
-                    : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+                    : "text-gray-700 hover:bg-gray-50 active:bg-gray-100"
                 }`}
               >
                 <span className="text-xs">{day}</span>
@@ -195,20 +194,20 @@ export default function CalendarPage() {
       <div className="lg:col-span-2">
 
       {/* Selected day events */}
-      <div className="px-4 lg:px-0 pt-2 pb-2">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <div className="px-4 lg:px-0 pt-3 pb-3">
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
           {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </h3>
         {dayEvents.length > 0 ? (
           <div className="space-y-2">
             {dayEvents.map((event) => (
-              <div key={event.id} className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${eventColor(event.type)}`}>
+              <div key={event.id} className="card p-3 flex items-start gap-3">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${eventColor(event.type)}`}>
                   {eventIcon(event.type)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${typeBadge(event.type)}`}>
+                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-md ${typeBadge(event.type)}`}>
                       {event.type}
                     </span>
                     <span className="text-xs text-gray-400">{event.time}</span>
@@ -225,17 +224,18 @@ export default function CalendarPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+          <div className="card p-6 text-center">
+            <Calendar className="w-8 h-8 text-gray-200 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No events scheduled</p>
           </div>
         )}
       </div>
 
-      {/* Upcoming Installations sidebar — like Replit */}
+      {/* Upcoming Installations */}
       {upcomingInstalls.length > 0 && (
-        <div className="px-4 pt-2 pb-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
+        <div className="px-4 lg:px-0 pt-2 pb-4">
+          <h3 className="section-title flex items-center gap-1.5 mb-2.5">
+            <Calendar className="w-4 h-4 text-gray-400" />
             Upcoming Installations
           </h3>
           <div className="space-y-2">
@@ -244,7 +244,7 @@ export default function CalendarPage() {
               const borderColor = isOverdue ? "border-l-red-500" : install.jobStatus === "Phase Done" ? "border-l-amber-500" : "border-l-emerald-500";
 
               return (
-                <div key={install.id} className={`bg-white rounded-xl p-3 border border-gray-100 shadow-sm border-l-4 ${borderColor}`}>
+                <div key={install.id} className={`card p-3 border-l-[3px] ${borderColor}`}>
                   <p className="text-sm font-medium text-gray-900">{install.name}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {install.date ? new Date(install.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "TBD"}
@@ -252,16 +252,16 @@ export default function CalendarPage() {
                   {install.projectManager && (
                     <p className="text-xs text-gray-400">{install.projectManager}</p>
                   )}
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${
-                      install.jobStatus === "In Progress" ? "bg-blue-50 text-blue-600" :
-                      install.jobStatus === "Phase Done" ? "bg-amber-50 text-amber-600" :
-                      "bg-emerald-50 text-emerald-600"
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md border ${
+                      install.jobStatus === "In Progress" ? "bg-blue-50 text-blue-600 border-blue-100" :
+                      install.jobStatus === "Phase Done" ? "bg-amber-50 text-amber-600 border-amber-100" :
+                      "bg-emerald-50 text-emerald-600 border-emerald-100"
                     }`}>
                       {install.jobStatus}
                     </span>
                     {isOverdue && (
-                      <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">Overdue</span>
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100">Overdue</span>
                     )}
                   </div>
                 </div>
@@ -278,27 +278,27 @@ export default function CalendarPage() {
 
 function eventColor(type: string) {
   switch (type) {
-    case "installation": return "bg-blue-100 text-blue-600";
-    case "meeting": return "bg-purple-100 text-purple-600";
-    case "delivery": return "bg-amber-100 text-amber-600";
-    default: return "bg-gray-100 text-gray-600";
+    case "installation": return "bg-blue-50 text-blue-600";
+    case "meeting": return "bg-purple-50 text-purple-600";
+    case "delivery": return "bg-amber-50 text-amber-600";
+    default: return "bg-gray-50 text-gray-600";
   }
 }
 
 function eventIcon(type: string) {
   switch (type) {
-    case "installation": return <Users className="w-5 h-5" />;
-    case "meeting": return <MessageSquare className="w-5 h-5" />;
-    case "delivery": return <Package className="w-5 h-5" />;
-    default: return <Calendar className="w-5 h-5" />;
+    case "installation": return <Users className="w-[18px] h-[18px]" />;
+    case "meeting": return <MessageSquare className="w-[18px] h-[18px]" />;
+    case "delivery": return <Package className="w-[18px] h-[18px]" />;
+    default: return <Calendar className="w-[18px] h-[18px]" />;
   }
 }
 
 function typeBadge(type: string) {
   switch (type) {
-    case "installation": return "bg-blue-50 text-blue-600";
-    case "meeting": return "bg-purple-50 text-purple-600";
-    case "delivery": return "bg-amber-50 text-amber-600";
-    default: return "bg-gray-50 text-gray-600";
+    case "installation": return "bg-blue-50 text-blue-600 border border-blue-100";
+    case "meeting": return "bg-purple-50 text-purple-600 border border-purple-100";
+    case "delivery": return "bg-amber-50 text-amber-600 border border-amber-100";
+    default: return "bg-gray-50 text-gray-600 border border-gray-100";
   }
 }
